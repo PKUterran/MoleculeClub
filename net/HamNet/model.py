@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
+from data.structures import MaskMatrices
 from net.PhysChem.layers import Initializer, ChemNet, FingerprintGenerator
 from .pretrain import HamiltonEngine
 
@@ -9,8 +10,7 @@ STATE_DICT_PATH = 'net/HamNet/state/hameng.pt'
 
 
 class HamNet(nn.Module):
-    def __init__(self, atom_dim: int, bond_dim: int,
-                 config: Dict[str, Any], use_cuda=False):
+    def __init__(self, atom_dim: int, bond_dim: int, config: Dict[str, Any], use_cuda=False):
         super(HamNet, self).__init__()
         self.ham_eng_ = [HamiltonEngine(atom_dim, bond_dim, config, use_cuda=use_cuda)]
         self.ham_eng_[0].load_state_dict(torch.load(STATE_DICT_PATH))
@@ -61,5 +61,16 @@ class HamNet(nn.Module):
             p_dropout=self.p_dropout
         )
 
-    def forward(self):
-        pass
+    def forward(self, atom_ftr: torch.Tensor, bond_ftr: torch.Tensor, massive: torch.Tensor,
+                mask_matrices: MaskMatrices, given_q_ftr: torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor]:
+        if given_q_ftr:
+            q_ftr = given_q_ftr
+            p_ftr = torch.zeros_like(q_ftr)
+        else:
+            p_ftr, q_ftr, *_ = self.ham_eng_[0].forward(
+                atom_ftr, bond_ftr, massive, mask_matrices, return_multi=False)
+
+        hv_ftr, he_ftr, *_ = self.initializer.forward(atom_ftr, bond_ftr, mask_matrices, pq_none=True)
+        hv_ftr, he_ftr, _ = self.mpnn.forward(hv_ftr, he_ftr, p_ftr, q_ftr, mask_matrices)
+        hm_ftr, _ = self.readout.forward(hv_ftr, mask_matrices)
+        return hm_ftr, q_ftr

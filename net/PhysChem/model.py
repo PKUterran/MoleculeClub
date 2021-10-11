@@ -1,20 +1,9 @@
 from .layers import *
-from enum import Enum
-
-
-class ConfType(Enum):
-    NONE = 0,
-    RDKIT = 1,
-    NEWTON = 2,
-    ONLY = 3,
-    NEWTON_RGT = 4,
-    REAL = 5,
-    SINGLE_CHANNEL = 6,
+from net.option import ConfType
 
 
 class PhysChem(nn.Module):
-    def __init__(self, atom_dim: int, bond_dim: int, config: dict,
-                 use_cuda=False):
+    def __init__(self, atom_dim: int, bond_dim: int, config: dict, use_cuda=False):
         super(PhysChem, self).__init__()
         hv_dim = config['HV_DIM']
         he_dim = config['HE_DIM']
@@ -100,8 +89,7 @@ class PhysChem(nn.Module):
             self.conformation_gen = lambda x: x
 
     def forward(self, atom_ftr: torch.Tensor, bond_ftr: torch.Tensor, massive: torch.Tensor,
-                mask_matrices: MaskMatrices,
-                given_q_ftr: torch.Tensor = None,
+                mask_matrices: MaskMatrices, given_q_ftr: torch.Tensor = None,
                 return_local_alignment=False, return_global_alignment=False, return_derive=False
                 ) -> Tuple[torch.Tensor, List[torch.Tensor],
                            List[List[np.ndarray]], List[np.ndarray], List[np.ndarray],
