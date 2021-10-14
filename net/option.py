@@ -1,11 +1,12 @@
 from enum import Enum
 
 
+# path
 class ModelType(Enum):
-    ATTENTIVE_FP = 'attentive_fp'
-    CVGAE = 'cvgae'
-    HAM_NET = 'ham_net'
-    PHYS_CHEM = 'phys_chem'
+    ATTENTIVE_FP = 'AttentiveFP'
+    CVGAE = 'CVGAE'
+    HAM_NET = 'HamNet'
+    PHYS_CHEM = 'PhysChem'
 
 
 class ConfType(Enum):

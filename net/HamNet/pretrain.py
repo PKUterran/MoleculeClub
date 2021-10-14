@@ -5,6 +5,8 @@ from .layers import LstmPQEncoder
 from .hamiltion import DissipativeHamiltonianDerivation
 from data.structures import MaskMatrices
 
+STATE_DICT_DIR = 'net/HamNet/state'
+
 
 class HamiltonEngine(nn.Module):
     def __init__(self, atom_dim, bond_dim, config, use_cuda=True):
